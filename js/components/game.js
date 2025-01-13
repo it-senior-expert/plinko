@@ -25,6 +25,7 @@ game.default = {
     validateOnUpdate: true,         // Validate on personal best?
     token: '',                      // CSRF token
     serverSeed: '',                 // Seed for randomness
+    clientSeed: '',                 // Client-provided seed for randomness
     userId: ''                      // User ID for validation
 }
 

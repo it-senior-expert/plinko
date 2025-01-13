@@ -45,11 +45,11 @@ gUI.Init = function (container) {
     gUI.background.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="1440" height="250" preserveAspectRatio="none" viewBox="0 0 1440 250"><g mask="url(&quot;#SvgjsMask1424&quot;)" fill="none"><rect width="1440" height="250" x="0" y="0" fill="rgba(254, 254, 255, 0)"></rect><path d="M42 250L292 0L610 0L360 250z" fill="url(#SvgjsLinearGradient1425)"></path><path d="M238.60000000000002 250L488.6 0L602.6 0L352.6 250z" fill="url(#SvgjsLinearGradient1425)"></path><path d="M496.20000000000005 250L746.2 0L840.7 0L590.7 250z" fill="url(#SvgjsLinearGradient1425)"></path><path d="M756.8000000000001 250L1006.8000000000001 0L1344.3000000000002 0L1094.3000000000002 250z" fill="url(#SvgjsLinearGradient1425)"></path><path d="M1438 250L1188 0L946.5 0L1196.5 250z" fill="url(#SvgjsLinearGradient1426)"></path><path d="M1199.4 250L949.4000000000001 0L796.4000000000001 0L1046.4 250z" fill="url(#SvgjsLinearGradient1426)"></path><path d="M943.8 250L693.8 0L390.79999999999995 0L640.8 250z" fill="url(#SvgjsLinearGradient1426)"></path><path d="M713.1999999999999 250L463.19999999999993 0L205.19999999999993 0L455.19999999999993 250z" fill="url(#SvgjsLinearGradient1426)"></path><path d="M1311.0099193826968 250L1440 121.00991938269689L1440 250z" fill="url(#SvgjsLinearGradient1425)"></path><path d="M0 250L128.9900806173031 250L 0 121.00991938269689z" fill="url(#SvgjsLinearGradient1426)"></path></g><defs><mask id="SvgjsMask1424"><rect width="1440" height="250" fill="#ffffff"></rect></mask><linearGradient x1="0%" y1="100%" x2="100%" y2="0%" id="SvgjsLinearGradient1425"><stop stop-color="rgba(41, 46, 57, 0.2)" offset="0"></stop><stop stop-opacity="0" stop-color="rgba(41, 46, 57, 0.2)" offset="0.66"></stop></linearGradient><linearGradient x1="100%" y1="100%" x2="0%" y2="0%" id="SvgjsLinearGradient1426"><stop stop-color="rgba(41, 46, 57, 0.2)" offset="0"></stop><stop stop-opacity="0" stop-color="rgba(41, 46, 57, 0.2)" offset="0.66"></stop></linearGradient></defs></svg>';
 
     // Game and bet frames
-    gUI.gameFrame = gUI.Col('g-frame-game', ['g-frame']);
     gUI.betFrame = gUI.Col('g-frame-bet');
+    gUI.gameFrame = gUI.Col('g-frame-game', ['g-frame']);
 
-    gUI.container.appendChild(gUI.gameFrame);
     gUI.container.appendChild(gUI.betFrame);
+    gUI.container.appendChild(gUI.gameFrame);
 
     // Bet frame sections
     gUI.betTop = gUI.Div('g-bet-top', ['g-bet-container']);
@@ -290,6 +290,24 @@ gUI.InitBetForm = function () {
  * Adds betting options to the bet form.
  */
 gUI.InitBetButtons = function () {
+    
+    // Bet types
+    var div = gUI.Row('g-bet-type', ['g-frame']);
+    gUI.betTop.appendChild(div);
+
+    // Bet Manual
+    gUI.betManual = gUI.Btn('Manual', () => {
+        game.PlaySound(game.sounds.select);
+        gUI.ManualButtons();
+    });
+    div.appendChild(gUI.betManual);
+
+    // Bet Auto
+    gUI.betAuto = gUI.Btn('Auto', () => {
+        game.PlaySound(game.sounds.select);
+        gUI.AutoButtons();
+    });
+    div.appendChild(gUI.betAuto);
 
     // Number of pins
     gUI.betPins = gUI.Row('g-bet-pins', ['g-frame']);
@@ -325,24 +343,6 @@ gUI.InitBetButtons = function () {
     });
     group.appendChild(gUI.btn16);
     gUI.btn16.classList.add((game.pinCount === 18) ? 'g-btn-primary' : 'g-btn-secondary');
-
-    // Bet types
-    var div = gUI.Row('g-bet-type', ['g-frame']);
-    gUI.betTop.appendChild(div);
-
-    // Bet Manual
-    gUI.betManual = gUI.Btn('Manual', () => {
-        game.PlaySound(game.sounds.select);
-        gUI.ManualButtons();
-    });
-    div.appendChild(gUI.betManual);
-
-    // Bet Auto
-    gUI.betAuto = gUI.Btn('Auto', () => {
-        game.PlaySound(game.sounds.select);
-        gUI.AutoButtons();
-    });
-    div.appendChild(gUI.betAuto);
 
     // Bet Options container
     gUI.betOptions = gUI.Div('g-bet-options');

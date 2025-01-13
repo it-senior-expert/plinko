@@ -1,3 +1,23 @@
+<?php
+// index.php
+session_start();  // Start the session to access session variables
+
+// Check if the user is logged in and has a session
+// if (!isset($_SESSION['userId'])) {
+//     // Redirect to login page if not logged in
+//     header('Location: login.php');
+//     exit;
+// }
+
+// Retrieve user data from session variables
+$userId = $_SESSION['userId'] ?? 'defaultUserId';;  // Assuming userId is stored in session when user logs in
+$gameId = $_SESSION['gameId'] ?? 'defaultGameId';  // Optional: gameId might be set after login or dynamically
+$lang = $_SESSION['lang'] ?? 'en';  // Default language setting
+$money = $_SESSION['money'] ?? 0;  // User's current balance, should be updated on backend after operations
+$home_url = $_SESSION['homeUrl'] ?? 'defaultHomeUrl';  // Optional: Home URL could be set in session or statically
+
+// Pass these parameters to the frontend
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +29,7 @@
 
     <link rel="stylesheet" href="css/game.css">
     <style>
-        html,body {
+        html, body {
             margin: 0;
             padding: 0;
             height: 100%;
@@ -40,9 +60,18 @@
     
     <!-- Game -->
     <script src="js/components/game.js"></script>
+    <script src="js/game_logic.js"></script>
     <script>
+        // Initialize the game with these parameters
+        initializeGame({
+            userId: '<?php echo $userId; ?>',
+            gameId: '<?php echo $gameId; ?>',
+            lang: '<?php echo $lang; ?>',
+            money: <?php echo $money; ?>,
+            homeUrl: '<?php echo $home_url; ?>'
+        });
 
-        // Initialize game
+        // Initialize game environment
         game.Init('#game');
 
     </script>
