@@ -491,7 +491,7 @@ game.InitMatter = function () {
         positionIterations: 12,
     });
     //game.engine.gravity.y = 0.35;
-    game.engine.gravity.y = game.height / 1500;
+game.engine.gravity.y = 0.35; // Adjusted gravity for desired bounce effect
     console.log(game.engine.gravity.y);
 
     // Create a renderer
@@ -932,8 +932,8 @@ game.CreateBall = function (type = 0) {
     // Create a new body
     var ball = Matter.Bodies.circle(x, y, radius, {
         isStatic: false,
-        restitution: .5,
-        friction: .1,
+restitution: 0.8, // Adjusted restitution for desired bounce effect
+friction: 0.05, // Adjusted friction for desired bounce effect
         frictionAir: .03,
         render: {
             fillStyle: game.TypeColor(type),

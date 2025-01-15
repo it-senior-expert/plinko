@@ -1,0 +1,2 @@
+{"userId":null,"gameId":null,"lang":"en","money":0,"home_url":null}
+{"userId":null,"gameId":null,"lang":"en","money":0,"home_url":null}

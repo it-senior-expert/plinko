@@ -3,19 +3,19 @@
 header('Content-Type: application/json');
 
 // Database connection settings (replace with your actual database details)
-$host = 'your_host';
-$dbname = 'your_database_name';
-$username = 'your_username';
-$password = 'your_password';
+// $host = 'your_host';
+// $dbname = 'your_database_name';
+// $username = 'your_username';
+// $password = 'your_password';
 
-// Establish database connection
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    echo json_encode(['success' => false, 'message' => 'Database connection failed: ' . $e->getMessage()]);
-    exit;
-}
+// // Establish database connection
+// try {
+//     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+//     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+// } catch (PDOException $e) {
+//     echo json_encode(['success' => false, 'message' => 'Database connection failed: ' . $e->getMessage()]);
+//     exit;
+// }
 
 // Handle API actions
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
