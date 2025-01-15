@@ -21,7 +21,7 @@ game.default = {
     betIncrement: 0.1,              // Bet increment
     canDebt: true,                  // Can player be in debt?
     validate: true,                 // Validate transactions?
-    validateUrl: 'process.php',     // Process URL
+    validateUrl: 'api.php',         // Process URL
     validateOnUpdate: true,         // Validate on personal best?
     token: '',                      // CSRF token
     serverSeed: '',                 // Seed for randomness
@@ -134,48 +134,10 @@ game.Init = function (container, options = null) {
             // Plinko
             game.InitPlinko();
 
-            // Login form
-            if (game.config.validate) {
-
-                // No user ID set
-                if (game.config.userId == '') {
-
-                    var form = document.createElement('form');
-
-                    // User ID
-                    game.userEl = gUI.Input('text', game._('form.user_id'), null, '');
-                    game.userEl.querySelector('input').setAttribute('required', '');
-                    form.appendChild(game.userEl);
-
-                    // Play for a prize?
-                    gUI.ShowModal(game._('modal.login.title'), game._('modal.login.content'), [
-                        gUI.BtnSecondary('No Thanks', () => {
-                            gUI.HideModal();
-                        }),
-                        gUI.BtnPrimary('Submit', () => {
-                            form.reportValidity();
-                            if (form.checkValidity()) {
-                                game.player.id = game.userEl.querySelector('input').value;
-                                gUI.HideModal();
-                            }
-                        })
-                    ])
-
-                    // Form
-                    form.setAttribute('method', 'get');
-                    form.addEventListener('submit', (e) => {
-                        e.preventDefault();
-                    });
-                    gUI.modalContent.appendChild(form);
-
-                } else {
-
-                    // User ID has been set
-                    game.player.id = game.config.userId;
-
-                }
-
-            }
+    // Set user ID directly from config
+    if (game.config.validate && game.config.userId !== '') {
+        game.player.id = game.config.userId;
+    }
 
         })
         .catch(() => {
@@ -292,8 +254,31 @@ game.Pay = function (amount) {
 
     // Update Appbar balance
     gUI.balance.innerText = game.config.currencySymbol + game.player.balance.toFixed(2);
+    // Post pay change to server
+    fetch(game.config.validateUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            action: 'update_transaction',
+            bet_amount : '6',
+            win_amount : '0',  
+            member_account : '12328XbtcX0d533145f54330d77',
+            game_uid : '067806e82742ca16bfffe70f76215647',
+            game_round : '3735554396885692691',
+            serial_number : '07cbadbe',
+            currency_code : 'USD',
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Pay change posted successfully:', data);
+    })
+    .catch((error) => {
+        console.error('Error posting pay change:', error);
+    });
 
-    // Create notification
     gUI.CheckoutNotification(amount, 'plus');
 
 }

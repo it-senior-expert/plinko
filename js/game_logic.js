@@ -1,7 +1,7 @@
 // game_logic.js
 function initializeGame(settings) {
     console.log('Game initialized with settings:', settings);
-    verifyUserBalance(settings.userId, settings.money);
+    verifyUserBalance(settings.userId, settings.money, settings.homeUrl);
     // Set session or cookie for user recognition
     document.cookie = "session=" + settings.session + "; path=/";
 }
@@ -15,10 +15,10 @@ function verifyUserBalance(userId, initialMoney, homeUrl) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            if (data.money >= initialMoney) {
-                updateUIBalance(data.money);  // Update balance in UI
+            if (data.balance >= initialMoney) {
+                updateUIBalance(data.balance);  // Update balance in UI
             } else {
-                displayNotification('Error', 'Insufficient balance');  // Display error message
+                displayNotification('Error', 'NOT LOGGED IN');  // Display error message
             }
         } else {
                 window.location.href = homeUrl;  // Redirect to home URL
@@ -35,7 +35,7 @@ function postTransaction(transactionData, homeUrl) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            updateUIBalance(data.money);  // Update the new balance after transaction
+            updateUIBalance(data.balance);  // Update the new balance after transaction
             displayNotification('Success', 'Transaction successful');  // Success notification
         } else {
             window.location.href = homeUrl;  // Redirect to home URL
@@ -44,7 +44,7 @@ function postTransaction(transactionData, homeUrl) {
 }
 
 function updateUIBalance(balance) {
-    game.Pay(balance);
+    // game.Pay(balance);
 }
 
 // Helper function to display notifications

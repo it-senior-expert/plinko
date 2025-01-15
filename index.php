@@ -1,20 +1,71 @@
 <?php
-// index.php
-session_start();  // Start the session to access session variables
+// Start the session to access session variables
+session_start();
+header('Content-Type: application/json');
 
-// Check if the user is logged in and has a session
-// if (!isset($_SESSION['userId'])) {
-//     // Redirect to login page if not logged in
-//     header('Location: login.php');
-//     exit;
-// }
+// Check for input variables and store them in the session if present
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['userId'])) {
+        $_SESSION['userId'] = $_POST['userId'];
+    }
+    if (isset($_POST['gameId'])) {
+        $_SESSION['gameId'] = $_POST['gameId'];
+    }
+    if (isset($_POST['lang'])) {
+        $_SESSION['lang'] = $_POST['lang'];
+    }
+    if (isset($_POST['money'])) {
+        $_SESSION['money'] = $_POST['money'];
+    }
+    if (isset($_POST['home_url'])) {
+        $_SESSION['homeUrl'] = $_POST['home_url'];
+    }
+}
 
-// Retrieve user data from session variables
-$userId = $_SESSION['userId'] ?? 'defaultUserId';;  // Assuming userId is stored in session when user logs in
-$gameId = $_SESSION['gameId'] ?? 'defaultGameId';  // Optional: gameId might be set after login or dynamically
+// Retrieve user data from session variables with default values
+$userId = $_SESSION['userId'] ?? null;
+$gameId = $_SESSION['gameId'] ?? null;
 $lang = $_SESSION['lang'] ?? 'en';  // Default language setting
-$money = $_SESSION['money'] ?? 0;  // User's current balance, should be updated on backend after operations
-$home_url = $_SESSION['homeUrl'] ?? 'defaultHomeUrl';  // Optional: Home URL could be set in session or statically
+$money = $_SESSION['money'] ?? 0.0;
+$home_url = $_SESSION['homeUrl'] ?? null;
+
+// Validate API Key
+$expectedApiKey = 'THISISTHEKEY';
+$headers = getallheaders();
+if (!isset($headers['X-API-Key']) || $headers['X-API-Key'] !== $expectedApiKey) {
+    echo json_encode(['success' => false, 'message' => 'Invalid API Key']);
+    exit;
+}
+
+// Log the input variables
+$logData = "UserID: $userId, GameID: $gameId, Lang: $lang, Money: $money, HomeURL: $home_url\n";
+file_put_contents('game_launch_log.txt', $logData, FILE_APPEND);
+
+// Generate the game launch URL
+$launchUrl = "http://localhost/game?userId=$userId&gameId=$gameId&lang=$lang&session=" . uniqid();
+// Output the launch URL for client-side redirection
+echo json_encode(['success' => true, 'launchUrl' => $launchUrl]);
+?>
+<script>
+    // Redirect to the game site using the launch URL
+    fetch(window.location.href)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.launchUrl;
+                // Initialize the game with these parameters
+                initializeGame({
+                    userId: '<?php echo $userId; ?>',
+                    gameId: '<?php echo $gameId; ?>',
+                    lang: '<?php echo $lang; ?>',
+                    money: <?php echo $money; ?>,
+                    homeUrl: '<?php echo $home_url; ?>'
+                });
+                game.Init('#game');
+            }
+        });
+</script>
+<?php
 
 // Pass these parameters to the frontend
 ?>
@@ -61,20 +112,5 @@ $home_url = $_SESSION['homeUrl'] ?? 'defaultHomeUrl';  // Optional: Home URL cou
     <!-- Game -->
     <script src="js/components/game.js"></script>
     <script src="js/game_logic.js"></script>
-    <script>
-        // Initialize the game with these parameters
-        initializeGame({
-            userId: '<?php echo $userId; ?>',
-            gameId: '<?php echo $gameId; ?>',
-            lang: '<?php echo $lang; ?>',
-            money: <?php echo $money; ?>,
-            homeUrl: '<?php echo $home_url; ?>'
-        });
-
-        // Initialize game environment
-        game.Init('#game');
-
-    </script>
-
 </body>
 </html>

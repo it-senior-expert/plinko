@@ -1,2 +1,9 @@
 {"userId":null,"gameId":null,"lang":"en","money":0,"home_url":null}
 {"userId":null,"gameId":null,"lang":"en","money":0,"home_url":null}
+UserID: , GameID: , Lang: en, Money: 0, HomeURL: 
+UserID: , GameID: , Lang: en, Money: 0, HomeURL: 
+UserID: , GameID: , Lang: en, Money: 0, HomeURL: 
+UserID: , GameID: , Lang: en, Money: 0, HomeURL: 
+UserID: , GameID: , Lang: en, Money: 0, HomeURL: 
+UserID: , GameID: , Lang: en, Money: 0, HomeURL: 
+UserID: , GameID: , Lang: en, Money: 0, HomeURL: 
