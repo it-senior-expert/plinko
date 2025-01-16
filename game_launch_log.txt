@@ -7,3 +7,7 @@ UserID: , GameID: , Lang: en, Money: 0, HomeURL:
 UserID: , GameID: , Lang: en, Money: 0, HomeURL: 
 UserID: , GameID: , Lang: en, Money: 0, HomeURL: 
 UserID: , GameID: , Lang: en, Money: 0, HomeURL: 
+UserID: kjh123, GameID: plinko, Lang: en, Money: 1000, HomeURL: http://gosomewhere
+UserID: kjh123, GameID: plinko, Lang: en, Money: 1000, HomeURL: http://gosomewhere
+UserID: kjh123, GameID: plinko, Lang: en, Money: 1000, HomeURL: http://gosomewhere
+UserID: kjh123, GameID: plinko, Lang: en, Money: 1000, HomeURL: http://gosomewhere

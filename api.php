@@ -1,31 +1,30 @@
 <?php
-// api.php
+require __DIR__ . '/vendor/autoload.php';
+
+use Dotenv\Dotenv;
+
+// Load the .env file
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 header('Content-Type: application/json');
-
-// Database connection settings (replace with your actual database details)
-$host = 'your_host';
-$dbname = 'your_database_name';
-$username = 'your_username';
-$password = 'your_password';
-
-// Establish database connection
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    echo json_encode(['success' => false, 'message' => 'Database connection failed: ' . $e->getMessage()]);
-    exit;
-}
 
 // Handle API actions
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $apiKey = $_ENV['X_API_KEY'];
     $data = json_decode(file_get_contents('php://input'), true);
     switch ($data['action']) {
         case 'get_balance':
-            echo json_encode(getUserBalance($data['userId'], $pdo));
+            echo json_encode(getUserBalance($data['userId']));
             break;
         case 'update_transaction':
-            echo json_encode(updateTransaction($data, $pdo));
+            echo json_encode(updateTransaction($data));
+            break;
+        case 'store_session':
+            echo json_encode(storeSession($data));
+            break;
+        case 'restore_session':
+            echo json_encode(restoreSession($data['sessionId']));
             break;
         default:
             echo json_encode(['success' => false, 'message' => 'Invalid action']);
@@ -33,46 +32,128 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // Function to get user balance
-function getUserBalance($userId, $pdo, $homeUrl = null) {
-    try {
-        $stmt = $pdo->prepare("SELECT balance FROM users WHERE user_id = ?");
-        $stmt->execute([$userId]);
-        $balance = $stmt->fetchColumn();
-        if ($balance !== false) {
-            return ['success' => true, 'balance' => $balance];
+function getUserBalance($userId, $homeUrl = null) {
+    $url = $_ENV['URL'];
+
+    $data = [
+        'userId' => $userId,
+        'gameId' => 'PLINKO',
+        'lang' => 'en',
+        'money' => 500.00,
+        'home_url' => $homeUrl
+    ];
+
+    $options = [
+        'http' => [
+            'header'  => "Content-type: application/x-www-form-urlencoded\r\n" .
+                         "Authorization: Bearer {$_ENV['X_API_KEY']}\r\n",
+            'method'  => 'POST',
+            'content' => http_build_query($data),
+        ],
+    ];
+    $context  = stream_context_create($options);
+    $result = file_get_contents($url, false, $context);
+
+    if ($result === FALSE) {
+        if ($homeUrl) {
+            header("Location: $homeUrl");
+            exit;
         } else {
-            if ($homeUrl) {
-                header("Location: $homeUrl");
-                exit;
-            } else {
-                return ['success' => false, 'message' => 'User not found'];
-            }
+            return ['success' => false, 'message' => 'Error contacting API'];
         }
-    } catch (PDOException $e) {
-        return ['success' => false, 'message' => 'Error fetching balance: ' . $e->getMessage()];
+    } else {
+        $response = json_decode($result, true);
+        return [
+            'success' => true,
+            'message' => 'CallBack Received',
+            'handle' => true,
+            'money' => $response['money'] ?? 0.0
+        ];
     }
 }
 
 // Function to update transaction
-function updateTransaction($transactionData, $pdo) {
-    try {
-        $stmt = $pdo->prepare("INSERT INTO transactions (user_id, bet_amount, win_amount, game_uid, game_round, serial_number, currency_code) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([
-            $transactionData['bet_amount'],
-            $transactionData['win_amount'],
-            $transactionData['member_account'],
-            $transactionData['game_uid'],
-            $transactionData['game_round'],
-            $transactionData['serial_number'],
-            $transactionData['currency_code']
-        ]);
-        if ($stmt->rowCount() > 0) {
-            return ['success' => true, 'message' => 'Transaction recorded'];
-        } else {
-            return ['success' => false, 'message' => 'Failed to record transaction'];
-        }
-    } catch (PDOException $e) {
-        return ['success' => false, 'message' => 'Error updating transaction: ' . $e->getMessage()];
+function updateTransaction($transactionData) {
+    $url = $_ENV['URL'];
+
+    $options = [
+        'http' => [
+            'header'  => "Content-type: application/x-www-form-urlencoded\r\n" .
+                         "Authorization: Bearer {$_ENV['X_API_KEY']}\r\n",
+            'method'  => 'POST',
+            'content' => http_build_query($transactionData),
+        ],
+    ];
+    $context  = stream_context_create($options);
+    $result = file_get_contents($url, false, $context);
+
+    if ($result === FALSE) {
+        return ['success' => false, 'message' => 'Error contacting API'];
+    } else {
+        $response = json_decode($result, true);
+        return [
+            'success' => true,
+            'message' => 'CallBack Received',
+            'handle' => true,
+            'money' => $response['money'] ?? 0.0
+        ];
     }
 }
-?>
+
+// Function to store session data
+function storeSession($sessionData) {
+    $url = $_ENV['URL'];
+
+    $options = [
+        'http' => [
+            'header'  => "Content-type: application/x-www-form-urlencoded\r\n" .
+                         "Authorization: Bearer {$_ENV['X_API_KEY']}\r\n",
+            'method'  => 'POST',
+            'content' => http_build_query($sessionData),
+        ],
+    ];
+    $context  = stream_context_create($options);
+    $result = file_get_contents($url, false, $context);
+
+    if ($result === FALSE) {
+        return ['success' => false, 'message' => 'Error contacting API'];
+    } else {
+        $response = json_decode($result, true);
+        return [
+            'success' => true,
+            'message' => 'CallBack Received',
+            'handle' => true,
+            'money' => $response['money'] ?? 0.0
+        ];
+    }
+}
+
+// Function to restore session data
+function restoreSession($sessionId) {
+    $url = $_ENV['URL'];
+
+    $data = ['sessionId' => $sessionId];
+
+    $options = [
+        'http' => [
+            'header'  => "Content-type: application/x-www-form-urlencoded\r\n" .
+                         "Authorization: Bearer {$_ENV['X_API_KEY']}\r\n",
+            'method'  => 'POST',
+            'content' => http_build_query($data),
+        ],
+    ];
+    $context  = stream_context_create($options);
+    $result = file_get_contents($url, false, $context);
+
+    if ($result === FALSE) {
+        return ['success' => false, 'message' => 'Error contacting API'];
+    } else {
+        $response = json_decode($result, true);
+        return [
+            'success' => true,
+            'message' => 'CallBack Received',
+            'handle' => true,
+            'money' => $response['money'] ?? 0.0
+        ];
+    }
+}

@@ -3,7 +3,28 @@ function initializeGame(settings) {
     console.log('Game initialized with settings:', settings);
     verifyUserBalance(settings.userId, settings.money, settings.homeUrl);
     // Set session or cookie for user recognition
-    document.cookie = "session=" + settings.session + "; path=/";
+    if (!document.cookie.includes("session")) {
+        document.cookie = "session=" + settings.session + "; path=/";
+    }
+    // Check for existing session and restore game state if available
+    const sessionCookie = document.cookie.split('; ').find(row => row.startsWith('session='));
+    if (sessionCookie) {
+        const sessionId = sessionCookie.split('=')[1];
+        // Fetch and restore game state using sessionId
+        fetch('api.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: 'restore_session', sessionId: sessionId})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Restore game state
+                game.player.balance = data.balance;
+                updateUIBalance(data.balance);
+            }
+        });
+    }
 }
 
 function verifyUserBalance(userId, initialMoney, homeUrl) {
@@ -44,6 +65,8 @@ function postTransaction(transactionData, homeUrl) {
 }
 
 function updateUIBalance(balance) {
+    // Update Appbar balance
+    gUI.balance.innerText = balance;
     // game.Pay(balance);
 }
 
