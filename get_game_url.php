@@ -51,6 +51,10 @@ file_put_contents('game_launch_log.txt', $logData, FILE_APPEND);
 $sessionId = $_SESSION['sessionId'] ?? uniqid();
 $_SESSION['sessionId'] = $sessionId;
 
+// Generate the game launch URL
+$launchUrl = "http://localhost/game?userId=$userId&gameId=$gameId&lang=$lang&session=$sessionId";
+echo json_encode(['success' => true, 'launchUrl' => $launchUrl]);
+
 ?>
 <script>
     // Redirect to the game site using the launch URL

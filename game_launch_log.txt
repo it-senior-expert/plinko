@@ -11,3 +11,4 @@ UserID: kjh123, GameID: plinko, Lang: en, Money: 1000, HomeURL: http://gosomewhe
 UserID: kjh123, GameID: plinko, Lang: en, Money: 1000, HomeURL: http://gosomewhere
 UserID: kjh123, GameID: plinko, Lang: en, Money: 1000, HomeURL: http://gosomewhere
 UserID: kjh123, GameID: plinko, Lang: en, Money: 1000, HomeURL: http://gosomewhere
+UserID: kjh123, GameID: plinko, Lang: en, Money: 1000, HomeURL: http://gosomewhere
