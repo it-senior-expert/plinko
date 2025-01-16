@@ -264,7 +264,7 @@ game.Pay = function (amount) {
         },
         body: JSON.stringify({
             action: 'update_transaction',
-            bet_amount: '0',
+            bet_amount: 0,
             win_amount: amount,
             member_account: '12328XbtcX0d533145f54330d77',
             game_uid: '067806e82742ca16bfffe70f76215647',
@@ -1001,7 +1001,7 @@ game.StartManual = function (type) {
         body: JSON.stringify({
             action: 'check_transaction',
             bet_amount: betMoney,
-            win_amount: '0',
+            win_amount: 0,
             member_account: '12328XbtcX0d533145f54330d77',
             game_uid: '067806e82742ca16bfffe70f76215647',
             game_round: '3735554396885692691',
@@ -1036,7 +1036,7 @@ game.StartManual = function (type) {
                     }
                 }, 2000);
             }
-            else{
+            else {
                 console.log('There is no enough money');
             }
         })
@@ -1059,7 +1059,7 @@ game.StartAuto = function () {
         body: JSON.stringify({
             action: 'check_transaction',
             bet_amount: betMoney,
-            win_amount: '0',
+            win_amount: 0,
             member_account: '12328XbtcX0d533145f54330d77',
             game_uid: '067806e82742ca16bfffe70f76215647',
             game_round: '3735554396885692691',
@@ -1073,13 +1073,13 @@ game.StartAuto = function () {
             if (data.money >= betMoney) {
                 // Disable board type options
                 gUI.betPins.classList.add('disabled');
-            
+
                 // Sound effect
                 game.PlaySound(game.sounds.money);
-            
+
                 // Autobetting
                 game.autoBetting = true;
-            
+
                 // Show stop button
                 gUI.autobetButton.innerHTML = 'Stop';
                 gUI.betBottom.classList.remove('disabled');
@@ -1087,7 +1087,7 @@ game.StartAuto = function () {
                 gUI.autobetButton.addEventListener('click', function () {
                     game.autobetting = false;
                     gUI.betBottom.classList.add('disabled');
-                    if (game.config.canDebt || game.player.balance >= game.config.minBet) {
+                    if (game.config.canDebt) {
                         if (game.interval) clearInterval(game.interval);
                         game.SetBet(parseFloat(gUI.betInput.querySelector('input').value).toFixed(2));
                         gUI.betTop.classList.remove('disabled');
@@ -1096,22 +1096,26 @@ game.StartAuto = function () {
                         gUI.AutoButtons();
                     }
                 });
+
+                game.interval = setInterval(function () {
+
+                    if (document.hasFocus()) {
+                        game.MakeBet();
+                        gUI.betBottom.classList.remove('disabled');
+                        //var x = gHelper.RandomRange(game.cx - (2/game.pinCount), game.cx + (2/game.pinCount));
+                        game.CreateBall(0);
+                    }
+
+                }, 2000);
+            }
+            else {
+                console.log('There is no enough money');
             }
         })
         .catch((error) => {
             console.error('Error posting pay change:', error);
         });
 
-    game.interval = setInterval(function () {
-
-        if (document.hasFocus()) {
-            game.MakeBet();
-            gUI.betBottom.classList.remove('disabled');
-            //var x = gHelper.RandomRange(game.cx - (2/game.pinCount), game.cx + (2/game.pinCount));
-            game.CreateBall(0);
-        }
-
-    }, 2000);
 
 }
 

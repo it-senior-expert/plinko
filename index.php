@@ -78,6 +78,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['token'])) {
             ";
         exit();
     }
+    else{
+        echo "Not Found";
+    }
 }
 
 // Close connection
