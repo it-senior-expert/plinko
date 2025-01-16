@@ -138,9 +138,9 @@ gUI.InitAppBar = function () {
     gUI.appbarTitle.appendChild(icon);
 
     // Money amount
-    gUI.balance = gUI.Div('g-appbar-money');
-    gUI.balance.innerHTML = game.config.currencySymbol + game.player.balance;
-    gUI.appbarTitle.appendChild(gUI.balance);
+    // gUI.balance = gUI.Div('g-appbar-money');
+    // gUI.balance.innerHTML = game.config.currencySymbol + game.player.balance;
+    // gUI.appbarTitle.appendChild(gUI.balance);
 
     // Checkout Notifications
     gUI.appbarCheckout = gUI.Div('g-appbar-checkout');

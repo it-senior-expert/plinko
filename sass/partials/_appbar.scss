@@ -23,43 +23,43 @@
     justify-content: right;
 }
 
-#g-appbar-money {
-    background: $c_brand;
-    color: #1E2329 !important;
-    padding: 5px 6px;
-    font-size: 12px;
-    border-radius: 4px;
-    position: relative;
-    font-weight: 700;
-}
+// #g-appbar-money {
+//     background: $c_brand;
+//     color: #1E2329 !important;
+//     padding: 5px 6px;
+//     font-size: 12px;
+//     border-radius: 4px;
+//     position: relative;
+//     font-weight: 700;
+// }
   
-#g-appbar-money:after {
-    content: "";
-    position: absolute;
-    border-style: solid;
-    border-top: 5px solid transparent;
-    border-right: 5px solid $c_brand;
-    border-bottom: 5px solid transparent;
-    border-left: 5px solid transparent;
-    left: -10px;
-}
+// #g-appbar-money:after {
+//     content: "";
+//     position: absolute;
+//     border-style: solid;
+//     border-top: 5px solid transparent;
+//     border-right: 5px solid $c_brand;
+//     border-bottom: 5px solid transparent;
+//     border-left: 5px solid transparent;
+//     left: -10px;
+// }
 
-#g-appbar-money-icon svg {
-    width: 14px;
-    height: 14px;
-    fill: $c_text;
-}
+// #g-appbar-money-icon svg {
+//     width: 14px;
+//     height: 14px;
+//     fill: $c_text;
+// }
 
-#g-appbar-money-icon {
-    background: $c_brand;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    width: 24px;
-    height: 24px;
-    border-radius: 100%;
-}
+// #g-appbar-money-icon {
+//     background: $c_brand;
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
+//     font-weight: 700;
+//     width: 24px;
+//     height: 24px;
+//     border-radius: 100%;
+// }
 
 $box-color: red;
 $box-width: 350px;

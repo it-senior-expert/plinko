@@ -21,7 +21,7 @@ game.default = {
     betIncrement: 0.1,              // Bet increment
     canDebt: true,                  // Can player be in debt?
     validate: true,                 // Validate transactions?
-    validateUrl: 'api.php',         // Process URL
+    validateUrl: 'php/api.php',         // Process URL
     validateOnUpdate: true,         // Validate on personal best?
     token: '',                      // CSRF token
     serverSeed: '',                 // Seed for randomness
@@ -95,7 +95,7 @@ game.drawFrame = null;
 /**
  * Scores
  */
-game.scoreSheet = [[],[],[]];
+game.scoreSheet = [[], [], []];
 
 /**
  * Initialize the game.
@@ -120,7 +120,7 @@ game.Init = function (container, options = null) {
 
             // Initialize seed
             game.SetupSeed();
-    
+
             // Initialize interface
             game.gameContainer = document.querySelector(container);
             gUI.Init(game.gameContainer);
@@ -134,10 +134,12 @@ game.Init = function (container, options = null) {
             // Plinko
             game.InitPlinko();
 
-    // Set user ID directly from config
-    if (game.config.validate && game.config.userId !== '') {
-        game.player.id = game.config.userId;
-    }
+            // Set user ID directly from config
+            if (game.config.validate && game.config.userId !== '') {
+                game.player.id = game.config.userId;
+            } else {
+                console.log("There is not enough money");
+            }
 
         })
         .catch(() => {
@@ -151,7 +153,7 @@ game.Init = function (container, options = null) {
  * 
  * @param {string} path    The JSON path.
  */
-game._ = function(path) {
+game._ = function (path) {
 
     var keys = path.split(".");
     var text = keys.reduce((obj, i) => obj[i], game.lang);
@@ -205,7 +207,7 @@ game.SetBet = function (val) {
 
     // Limit bet to min/max
     val = gHelper.Clamp(val, game.config.minBet, game.config.maxBet);
-    
+
     // Submitted bet
     var bet = gHelper.Clamp(parseFloat(val), game.config.minBet, game.player.balance).toFixed(2);
 
@@ -247,13 +249,13 @@ game.MakeBet = function () {
  * @param {number} amount   The amount to pay the player.
  */
 game.Pay = function (amount) {
-
-    // Take money from player balance
+    // Add amount to player balance
     game.player.balance += amount;
     game.log.push(game.player.balance);
 
+    var winBet = (game.player.balance.toFixed(2))
     // Update Appbar balance
-    gUI.balance.innerText = game.config.currencySymbol + game.player.balance.toFixed(2);
+    // gUI.balance.innerText = game.config.currencySymbol + game.player.balance.toFixed(2);
     // Post pay change to server
     fetch(game.config.validateUrl, {
         method: 'POST',
@@ -262,25 +264,24 @@ game.Pay = function (amount) {
         },
         body: JSON.stringify({
             action: 'update_transaction',
-            bet_amount : '6',
-            win_amount : '0',  
-            member_account : '12328XbtcX0d533145f54330d77',
-            game_uid : '067806e82742ca16bfffe70f76215647',
-            game_round : '3735554396885692691',
-            serial_number : '07cbadbe',
-            currency_code : 'USD',
+            bet_amount: '0',
+            win_amount: amount,
+            member_account: '12328XbtcX0d533145f54330d77',
+            game_uid: '067806e82742ca16bfffe70f76215647',
+            game_round: '3735554396885692691',
+            serial_number: '07cbadbe',
+            currency_code: 'USD',
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Pay change posted successfully:', data);
-    })
-    .catch((error) => {
-        console.error('Error posting pay change:', error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            console.log('Pay change posted successfully:', data);
+        })
+        .catch((error) => {
+            console.error('Error posting pay change:', error);
+        });
 
     gUI.CheckoutNotification(amount, 'plus');
-
 }
 
 /**
@@ -295,7 +296,7 @@ game.Charge = function (amount) {
     game.log.push(game.player.balance);
 
     // Update Appbar balance
-    gUI.balance.innerText = game.config.currencySymbol + game.player.balance.toFixed(2);
+    // gUI.balance.innerText = game.config.currencySymbol + game.player.balance.toFixed(2);
 
     // Create notification
     gUI.CheckoutNotification(amount, 'minus');
@@ -313,7 +314,7 @@ game.Cashout = function () {
         // Player scored a new personal best?
         if (!game.config.validateOnUpdate ||
             (game.player.balance > game.player.balance_best)) {
-            
+
             // Record new best
             game.player.balance_best = game.player.balance;
 
@@ -322,17 +323,17 @@ game.Cashout = function () {
                 var xhr = new XMLHttpRequest();
                 xhr.open("POST", game.config.validateUrl, true);
                 xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.send(JSON.stringify({
-                    id: game.player.id,
-                    balance: game.player.balance,
-                    transactions: game.log,
-                    token: game.config.token
-                }));
-                xhr.onload = function () {
-                    console.log("Leaderboard updated!");
-                    console.log(xhr.responseText);
-                    //console.log(this.responseText);
-                }
+                // xhr.send(JSON.stringify({
+                //     id: game.player.id,
+                //     balance: game.player.balance,
+                //     transactions: game.log,
+                //     token: game.config.token
+                // }));
+                // xhr.onload = function () {
+                //     console.log("Leaderboard updated!");
+                //     console.log(xhr.responseText);
+                //     //console.log(this.responseText);
+                // }
             }
 
         }
@@ -354,12 +355,12 @@ game.Cashout = function () {
  * Stores all the loaded audio files.
  */
 game.sounds = {};
- 
+
 /**
  * Adds all the game sounds.
  */
 game.InitSounds = function () {
-    
+
     game.sounds.select = 'audio/select.mp3';
     game.sounds.win = 'audio/win.wav';
     game.sounds.whoosh = 'audio/whoosh.mp3';
@@ -383,8 +384,8 @@ game.PlaySound = function (sound) {
     }
 
 }
- 
- //#endregion
+
+//#endregion
 // -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
@@ -460,7 +461,7 @@ game.InitMatter = function () {
         Runner = Matter.Runner,
         Bodies = Matter.Bodies,
         Composite = Matter.Composite;
-    
+
     // Plugins
     Matter.use('matter-attractors');
 
@@ -476,8 +477,7 @@ game.InitMatter = function () {
         positionIterations: 12,
     });
     //game.engine.gravity.y = 0.35;
-game.engine.gravity.y = 0.35; // Adjusted gravity for desired bounce effect
-    console.log(game.engine.gravity.y);
+    game.engine.gravity.y = 0.35; // Adjusted gravity for desired bounce effect
 
     // Create a renderer
     game.render = Render.create({
@@ -515,7 +515,7 @@ game.engine.gravity.y = 0.35; // Adjusted gravity for desired bounce effect
     game.uiCanvas.id = "g-ui-canvas";
     game.uiCanvas.width = game.width;
     game.uiCanvas.height = game.height;
-    
+
     gUI.gameFrame.appendChild(game.uiCanvas);
 
 }
@@ -523,10 +523,10 @@ game.engine.gravity.y = 0.35; // Adjusted gravity for desired bounce effect
 /**
  * Handles all the collision events.
  */
-game.InitCollisions = function() {
+game.InitCollisions = function () {
 
     // Matter.js collision event
-    Matter.Events.on(game.engine, "collisionStart", function(event) {
+    Matter.Events.on(game.engine, "collisionStart", function (event) {
 
         // Get all pairs
         var pairs = event.pairs;
@@ -535,9 +535,9 @@ game.InitCollisions = function() {
         if (pairs[0].bodyA.label == 'zone' && pairs[0].bodyB.label == 'ball') {
             game.BallWin(pairs[0].bodyA, pairs[0].bodyB);
         } else
-        if (pairs[0].bodyA.label == 'ball' && pairs[0].bodyB.label == 'zone') {
-            game.BallWin(pairs[0].bodyB, pairs[0].bodyA);
-        }
+            if (pairs[0].bodyA.label == 'ball' && pairs[0].bodyB.label == 'zone') {
+                game.BallWin(pairs[0].bodyB, pairs[0].bodyA);
+            }
 
     });
 
@@ -563,7 +563,7 @@ game.SetupBoard = function (n) {
         Matter.World.remove(game.engine.world, zone);
 
     });
-    
+
     // Reset
     game.pins = [];
     game.winZones = [];
@@ -583,18 +583,18 @@ game.SetupBoard = function (n) {
             gUI.btn14.classList = 'g-btn-default g-btn-secondary';
             gUI.btn16.classList = 'g-btn-default g-btn-secondary';
             break;
-     
+
         case 16:
             gUI.btn12.classList = 'g-btn-default g-btn-secondary';
             gUI.btn14.classList = 'g-btn-default g-btn-primary';
             gUI.btn16.classList = 'g-btn-default g-btn-secondary';
             break;
-        
+
         case 18:
             gUI.btn12.classList = 'g-btn-default g-btn-secondary';
             gUI.btn14.classList = 'g-btn-default g-btn-secondary';
             gUI.btn16.classList = 'g-btn-default g-btn-primary';
-        break;
+            break;
 
     }
 
@@ -615,14 +615,16 @@ game.SetupBoard = function (n) {
     }
 
     // Walls
-    var wall = Matter.Bodies.rectangle(xspace/1.5, game.cy, xspace, game.height,
-        { isStatic: true, render: { fillStyle: "transparent" }
-    });
+    var wall = Matter.Bodies.rectangle(xspace / 1.5, game.cy, xspace, game.height,
+        {
+            isStatic: true, render: { fillStyle: "transparent" }
+        });
     Matter.Composite.add(game.engine.world, wall);
 
     var wall = Matter.Bodies.rectangle(game.width - (xspace / 1.5), game.cy, xspace, game.height,
-        { isStatic: true, render: { fillStyle: "transparent" }
-    });
+        {
+            isStatic: true, render: { fillStyle: "transparent" }
+        });
     Matter.Composite.add(game.engine.world, wall);
 
     // Set colours
@@ -657,7 +659,7 @@ game.SetupWinZones = function (n, x, y, xspace, yspace) {
     var xx = x;
     for (var i = 0; i < 3; i++) {
 
-        for (var j = 0; j < game.pinCount-1; j++) {
+        for (var j = 0; j < game.pinCount - 1; j++) {
 
             var options = {
                 isStatic: true,
@@ -727,7 +729,7 @@ game.DrawUI = function () {
     // Draw win zones
     var multi = 0;
     for (var i = 0; i < 1; i++) {
-        for (var j = 0; j < game.pinCount-1; j++) {
+        for (var j = 0; j < game.pinCount - 1; j++) {
 
             // Zone object
             var zone = game.uiZones[i][j];
@@ -778,7 +780,7 @@ game.MoveBalls = function () {
  * @param {*} zone 
  * @param {*} ball 
  */
-game.BallWin = function(zone, ball) {
+game.BallWin = function (zone, ball) {
 
     // Activate win zone
     game.uiZones[ball.valueType][zone.index].hit = true;
@@ -822,17 +824,17 @@ game.CalculateOdds = function (n) {
 
     var odds = [[], [], []];
     var multiplier = Math.round(pascalOdds.length / 2) - 1;
-    
+
     for (var i = 0; i < 3; i++) {
         for (var j = 0; j < pascalOdds.length; j++) {
 
             var value;
             switch (i) {
                 case 1:
-                    value = (Math.abs(multiplier) > 3 ? 0.3 * (Math.abs(multiplier) * (i+1)) : 0.2 * Math.abs(multiplier));
+                    value = (Math.abs(multiplier) > 3 ? 0.3 * (Math.abs(multiplier) * (i + 1)) : 0.2 * Math.abs(multiplier));
                     break;
                 case 2:
-                    value = (Math.abs(multiplier) > 4 ? 0.2 * (Math.abs(multiplier) * (i+2)) : 0.2 * Math.abs(multiplier));
+                    value = (Math.abs(multiplier) > 4 ? 0.2 * (Math.abs(multiplier) * (i + 2)) : 0.2 * Math.abs(multiplier));
                     break;
                 default:
                     value = 0.5 * Math.abs(multiplier);
@@ -862,7 +864,7 @@ game.CalculateOdds = function (n) {
  * @param {number} y    The y position.
  * @param {number} r    The radius.
  */
-game.CreatePin = function(x, y, r) {
+game.CreatePin = function (x, y, r) {
 
     // Create a new body
     var pin = Matter.Bodies.circle(x, y, r, {
@@ -903,22 +905,22 @@ game.CreateBall = function (type = 0) {
     randomVal = Math.round(game.random() * randomMax);
 
     var target = oddsList[n].reduce((acc, obj) =>
-       Math.abs(randomVal - obj.rating) < Math.abs(randomVal - acc.rating) ? obj : acc
+        Math.abs(randomVal - obj.rating) < Math.abs(randomVal - acc.rating) ? obj : acc
     );
 
     // Position
     var space = (game.width / game.pinCount) / 1.1;
     var x = (target.x < game.cx ? game.cx - (space / 2) : game.cx + (space / 2));
     var y = 0;
-    
+
     // Radius
     var radius = (game.width / game.pinCount) / 5;
 
     // Create a new body
     var ball = Matter.Bodies.circle(x, y, radius, {
         isStatic: false,
-restitution: 0.8, // Adjusted restitution for desired bounce effect
-friction: 0.05, // Adjusted friction for desired bounce effect
+        restitution: 0.8, // Adjusted restitution for desired bounce effect
+        friction: 0.05, // Adjusted friction for desired bounce effect
         frictionAir: .03,
         render: {
             fillStyle: game.TypeColor(type),
@@ -941,12 +943,12 @@ friction: 0.05, // Adjusted friction for desired bounce effect
                 function () {
 
                     anchor.position.y = ball.position.y + space;
-                    
+
                     var force = {
                         x: (anchor.position.x - ball.position.x) * 0.0000001,
                         y: (anchor.position.y - ball.position.y) * 0.0000001,
                     };
-            
+
                     // apply force to both bodies
                     Matter.Body.applyForce(anchor, anchor.position, Matter.Vector.neg(force));
                     Matter.Body.applyForce(ball, ball.position, force);
@@ -956,7 +958,7 @@ friction: 0.05, // Adjusted friction for desired bounce effect
         }
     });
     ball.anchor = anchor;
-    
+
     // Add to scene
     Matter.Composite.add(game.engine.world, [anchor, ball]);
 
@@ -971,7 +973,7 @@ friction: 0.05, // Adjusted friction for desired bounce effect
  * 
  * @returns {string}
  */
-game.TypeColor = function(type) {
+game.TypeColor = function (type) {
 
     switch (type) {
         case 0:
@@ -990,64 +992,118 @@ game.TypeColor = function(type) {
  * @param {number} type     The bet type.
  */
 game.StartManual = function (type) {
+    var betMoney = parseFloat(gUI.betInput.querySelector('input').value).toFixed(2)
+    fetch(game.config.validateUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            action: 'check_transaction',
+            bet_amount: betMoney,
+            win_amount: '0',
+            member_account: '12328XbtcX0d533145f54330d77',
+            game_uid: '067806e82742ca16bfffe70f76215647',
+            game_round: '3735554396885692691',
+            serial_number: '07cbadbe',
+            currency_code: 'USD',
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Pay change posted successfully:', data);
+            if (data.money >= betMoney) {
 
-    // Disable board type options
-    gUI.betPins.classList.add('disabled');
+                // Disable board type options
+                gUI.betPins.classList.add('disabled');
 
-    // Sound effect
-    game.PlaySound(game.sounds.money);
+                // Sound effect
+                game.PlaySound(game.sounds.money);
 
-    // Set bet
-    game.MakeBet();
+                // Set bet
+                game.MakeBet();
 
-    // Create ball
-    game.CreateBall(type);
+                // Create ball
+                game.CreateBall(type);
 
-    // Short delay before can bet again
-    setTimeout(function () {
-        if (game.config.canDebt || game.player.balance >= game.config.minBet) {
-            game.SetBet(parseFloat(gUI.betInput.querySelector('input').value).toFixed(2));
-            gUI.betTop.classList.remove('disabled');
-            gUI.betCenter.classList.remove('disabled');
-            gUI.betBottom.classList.remove('disabled');
-        }
-    }, 2000);
-
+                // Short delay before can bet again
+                setTimeout(function () {
+                    if (game.config.canDebt) {
+                        game.SetBet(parseFloat(gUI.betInput.querySelector('input').value).toFixed(2));
+                        gUI.betTop.classList.remove('disabled');
+                        gUI.betCenter.classList.remove('disabled');
+                        gUI.betBottom.classList.remove('disabled');
+                    }
+                }, 2000);
+            }
+            else{
+                console.log('There is no enough money');
+            }
+        })
+        .catch((error) => {
+            console.error('Error posting pay change:', error);
+        });
 }
 
 /**
  * Starts a auto betting game.
  */
 game.StartAuto = function () {
+    var betMoney = parseFloat(gUI.betInput.querySelector('input').value).toFixed(2)
 
-    // Disable board type options
-    gUI.betPins.classList.add('disabled');
-
-    // Sound effect
-    game.PlaySound(game.sounds.money);
-
-    // Autobetting
-    game.autoBetting = true;
-
-    // Show stop button
-    gUI.autobetButton.innerHTML = 'Stop';
-    gUI.betBottom.classList.remove('disabled');
-    gUI.autobetButton.onclick = {};
-    gUI.autobetButton.addEventListener('click', function () {
-        game.autobetting = false;
-        gUI.betBottom.classList.add('disabled');
-        if (game.config.canDebt || game.player.balance >= game.config.minBet) {
-            if (game.interval) clearInterval(game.interval);
-            game.SetBet(parseFloat(gUI.betInput.querySelector('input').value).toFixed(2));
-            gUI.betTop.classList.remove('disabled');
-            gUI.betCenter.classList.remove('disabled');
-            gUI.betBottom.classList.remove('disabled');
-            gUI.AutoButtons();
-        }
-    });
+    fetch(game.config.validateUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            action: 'check_transaction',
+            bet_amount: betMoney,
+            win_amount: '0',
+            member_account: '12328XbtcX0d533145f54330d77',
+            game_uid: '067806e82742ca16bfffe70f76215647',
+            game_round: '3735554396885692691',
+            serial_number: '07cbadbe',
+            currency_code: 'USD',
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Pay change posted successfully:', data);
+            if (data.money >= betMoney) {
+                // Disable board type options
+                gUI.betPins.classList.add('disabled');
+            
+                // Sound effect
+                game.PlaySound(game.sounds.money);
+            
+                // Autobetting
+                game.autoBetting = true;
+            
+                // Show stop button
+                gUI.autobetButton.innerHTML = 'Stop';
+                gUI.betBottom.classList.remove('disabled');
+                gUI.autobetButton.onclick = {};
+                gUI.autobetButton.addEventListener('click', function () {
+                    game.autobetting = false;
+                    gUI.betBottom.classList.add('disabled');
+                    if (game.config.canDebt || game.player.balance >= game.config.minBet) {
+                        if (game.interval) clearInterval(game.interval);
+                        game.SetBet(parseFloat(gUI.betInput.querySelector('input').value).toFixed(2));
+                        gUI.betTop.classList.remove('disabled');
+                        gUI.betCenter.classList.remove('disabled');
+                        gUI.betBottom.classList.remove('disabled');
+                        gUI.AutoButtons();
+                    }
+                });
+            }
+        })
+        .catch((error) => {
+            console.error('Error posting pay change:', error);
+        });
 
     game.interval = setInterval(function () {
-        
+
         if (document.hasFocus()) {
             game.MakeBet();
             gUI.betBottom.classList.remove('disabled');
@@ -1062,7 +1118,7 @@ game.StartAuto = function () {
 /**
  * Modify game mode based on colour scheme.
  */
-game.ToggleDarkMode = function() {
+game.ToggleDarkMode = function () {
 
     // Update pins
     for (let i = 0; i < game.pins.length; i++) {
