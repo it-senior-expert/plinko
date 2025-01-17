@@ -1,29 +1,6 @@
 // game_logic.js
-function initializeGame(settings) {
-    console.log('Game initialized with settings:', settings);
-    // Set session or cookie for user recognition
-    if (!document.cookie.includes("session")) {
-        document.cookie = "session=" + settings.session + "; path=/";
-    }
-    // Check for existing session and restore game state if available
-    const sessionCookie = document.cookie.split('; ').find(row => row.startsWith('session='));
-    if (sessionCookie) {
-        const sessionId = sessionCookie.split('=')[1];
-        // Fetch and restore game state using sessionId
-        fetch('php/api.php', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({action: 'restore_session', sessionId: sessionId})
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Restore game state
-                game.player.balance = data.balance;
-                updateUIBalance(data.balance);
-            }
-        });
-    }
+function initializeGame(token) {
+    game.config.token = token;
 }
 
 function postTransaction(transactionData, homeUrl) {

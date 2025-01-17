@@ -519,6 +519,29 @@ gUI.CheckoutNotification = function (amount, type) {
     gUI.RemoveOnFade(notification, game.config.notificationDelay * (gUI.appbarCheckout.childElementCount - 1));
 
 }
+gUI.CheckoutStateNotification = function (text) {
+
+    // Create notification
+    var notification = document.createElement('div');
+    notification.classList.add('g-appbar-state-notification');
+    notification.classList.add(type);
+    
+    // Icon
+    notification.innerHTML = gIcon.minus;
+
+    // Text
+    var text = document.createElement('div');
+    text.classList.add('g-appbar-notification-text');
+    text.innerText = text;
+    notification.appendChild(text);
+
+    // Add to appbar
+    gUI.appbarCheckout.appendChild(notification);
+
+    // Remove notification after 2 seconds
+    gUI.RemoveOnFade(notification, game.config.notificationDelay * (gUI.appbarCheckout.childElementCount - 1));
+
+}
 
 //#endregion
 // -----------------------------------------------------------------------------

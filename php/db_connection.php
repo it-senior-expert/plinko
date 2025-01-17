@@ -1,10 +1,14 @@
 <?php
+require_once 'env_loader.php';
 // Database configuration
-$host = 'mysql-306b09b7-it-4911.i.aivencloud.com';
-$port = 10784;
-$db = 'defaultdb';
-$user = 'avnadmin';
-$pass = 'AVNS_wl9L7QlTJ0n5yuHJ_W9'; // Replace with the actual password
+$host = $_ENV['DB_HOST'];
+$port = $_ENV['DB_PORT'];
+$db = $_ENV['DB_NAME'];
+$user = $_ENV['DB_USER'];
+$pass = $_ENV['DB_PASS'];
+
+// Database Table
+$tableName = $_ENV['DB_TBL_NAME'];
 
 // Create a connection
 $conn = new mysqli($host, $user, $pass, $db, $port);
@@ -14,19 +18,81 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// SQL to create table
-$sql = "CREATE TABLE IF NOT EXISTS userInfors (
-    userId VARCHAR(255) NOT NULL PRIMARY KEY,
-    gameId VARCHAR(255) NOT NULL,
-    lang VARCHAR(10) NOT NULL,
-    money DECIMAL(10, 2) NOT NULL,
-    homeUrl VARCHAR(255) NOT NULL,
-    token VARCHAR(255) NOT NULL
-)";
-// if ($conn->query($sql) === TRUE) {
-//     echo "Table userInfors created successfully";
-// } else {
-//     echo "Error creating table: " . $conn->error;
-// }
+function isExistUser($userId)
+{
+    global $conn, $tableName;
+    try {
+        $stmt = $conn->prepare("SELECT userId FROM {$tableName} WHERE userId = ?");
+        $stmt->bind_param("s", $userId);
+        if (!$stmt->execute()) {
+            throw new \Exception($stmt->error);
+        }
+        $result = $stmt->get_result();
+        $stmt->close();
 
+        if ($result->num_rows > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    } catch (\Throwable $th) {
+        throw $th;
+    }
+}
+
+function updateTable($userId, $gameId, $lang, $money, $homeUrl, $token, $gameRound)
+{
+    global $conn, $tableName;
+    try {
+        $stmt = $conn->prepare("UPDATE {$tableName} SET gameId = ?, lang = ?, money = ?, homeUrl = ?, token = ?, gameRound = ? WHERE userId = ?");
+        $stmt->bind_param("ssdssss", $gameId, $lang, $money, $homeUrl, $token, $gameRound, $userId);
+        if (!$stmt->execute()) {
+            throw new \Exception($stmt->error);
+        }
+        $stmt->close();
+    } catch (\Throwable $th) {
+        throw $th;
+    }
+}
+
+function upsertTable($userId, $gameId, $lang, $money, $homeUrl, $token, $gameRound)
+{
+    global $conn, $tableName;
+    try {
+        $isExist = isExistUser($userId);
+        if ($isExist) {
+            updateTable($userId, $gameId, $lang, $money, $homeUrl, $token, $gameRound);
+        } else {
+            $stmt = $conn->prepare("INSERT INTO {$tableName} (userId, gameId, lang, money, homeUrl, token, gameRound) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssdsss", $userId, $gameId, $lang, $money, $homeUrl, $token, $gameRound);
+            if (!$stmt->execute()) {
+                throw new \Exception($stmt->error);
+            }
+            $stmt->close();
+        }
+    } catch (\Throwable $th) {
+        throw $th;
+    }
+}
+
+function getUserByToken($token): array|bool|null
+{
+    global $conn, $tableName;
+    try {
+        $row = null;
+        $stmt = $conn->prepare("SELECT * FROM {$tableName} WHERE token = ?");
+        $stmt->bind_param("s", $token);
+        if (!$stmt->execute()) {
+            throw new \Exception($stmt->error);
+        }
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+        }
+        $stmt->close();
+        return $row;
+    } catch (\Throwable $th) {
+        throw $th;
+    }
+}
 ?>

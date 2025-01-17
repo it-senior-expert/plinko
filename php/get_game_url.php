@@ -1,75 +1,46 @@
 <?php
-session_start();
-header('Content-Type: application/json');
-
 require __DIR__ . '/../vendor/autoload.php';
-require 'db_connection.php'; // Include the database connection
+require_once 'env_loader.php';
+require 'db_connection.php';
+require 'json_response.php';
+require 'jwt.php';
+require 'utils.php';
 
-use Dotenv\Dotenv;
+$userId = null;
+$gameId = null;
+$lang = 'en';
+$money = 0;
+$homeUrl = null;
 
-$dotenv = Dotenv::createImmutable(__DIR__ . '/..');
-$dotenv->load();
-
+# Request Validation
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['userId'])) {
-        $_SESSION['userId'] = $_POST['userId'];
+    $userId = $_POST['userId'] ?? null;
+    $gameId = $_POST['gameId'] ?? null;
+    $lang = $_POST['lang'] ?? 'en';
+    $money = $_POST['money'] ?? 0.0;
+    $homeUrl = $_POST['homeUrl'] ?? null;
+    if (!$userId || $gameId !== $_ENV['GAME_ID'] || !$homeUrl) {
+        errorResponse('Missing paramaters');
     }
-    if (isset($_POST['gameId'])) {
-        $_SESSION['gameId'] = $_POST['gameId'];
-    }
-    if (isset($_POST['lang'])) {
-        $_SESSION['lang'] = $_POST['lang'];
-    }
-    if (isset($_POST['money'])) {
-        $_SESSION['money'] = $_POST['money'];
-    }
-    if (isset($_POST['home_url'])) {
-        $_SESSION['homeUrl'] = $_POST['home_url'];
-    }
+} else {
+    errorResponse('Not Allowed Method!');
 }
-
-$userId = $_SESSION['userId'] ?? null;
-$gameId = $_SESSION['gameId'] ?? null;
-$lang = $_SESSION['lang'] ?? 'en';
-$money = $_SESSION['money'] ?? 0.0;
-$home_url = $_SESSION['homeUrl'] ?? null;
 
 $apiKey = $_ENV['X_API_KEY'];
 $headers = getallheaders();
 if (!isset($headers['X-API-Key']) || $headers['X-API-Key'] !== $apiKey) {
-    echo json_encode(['success' => false, 'message' => 'Invalid API Key']);
-    exit;
-}
-
-$tokenFromUrl = $_GET['token'] ?? null;
-
-// Function to generate a token
-function generateToken($userId, $gameId, $lang, $money, $home_url) {
-    $timestamp = time();
-    $expiration = $timestamp + 3600; // 1 hour expiration
-    $randomString = bin2hex(random_bytes(5));
-    return hash('sha256', $userId . $gameId . $lang . $money . $home_url . $timestamp . $expiration . $randomString);
+    errorResponse('Invalid API Key');
 }
 
 // Generate token
-$token = generateToken($userId, $gameId, $lang, $money, $home_url);
-
-
-// Prepare and bind
-$stmt = $conn->prepare("INSERT INTO userInfors (userId, gameId, lang, money, homeUrl, token) VALUES (?, ?, ?, ?, ?, ?)");
-$stmt->bind_param("sssdss", $userId, $gameId, $lang, $money, $home_url, $token);
-
-// Execute the statement
-if ($stmt->execute()) {
-    echo "New record created successfully";
-} else {
-    echo "Error: " . $stmt->error;
+$token = generateToken($userId, $gameId, $lang, $money, $homeUrl);
+$gameRound = generateRandomString(26);
+// Upsert to db
+try {
+    upsertTable($userId, $gameId, $lang, $money, $homeUrl, $token, $gameRound);
+    // Send token to client
+    successReponse(['token' => $token]);
+} catch (\Throwable $th) {
+    errorResponse($th);
 }
-
-// Send token to client
-echo json_encode(['success' => true, 'token' => $token]);
-
-// Close connections
-$stmt->close();
-$conn->close();
 ?>

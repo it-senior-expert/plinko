@@ -266,10 +266,7 @@ game.Pay = function (amount) {
             action: 'update_transaction',
             bet_amount: 0,
             win_amount: amount,
-            member_account: '12328XbtcX0d533145f54330d77',
-            game_uid: '067806e82742ca16bfffe70f76215647',
-            game_round: '3735554396885692691',
-            serial_number: '07cbadbe',
+            token: game.config.token,
             currency_code: 'USD',
         })
     })
@@ -993,6 +990,7 @@ game.TypeColor = function (type) {
  */
 game.StartManual = function (type) {
     var betMoney = parseFloat(gUI.betInput.querySelector('input').value).toFixed(2)
+
     fetch(game.config.validateUrl, {
         method: 'POST',
         headers: {
@@ -1002,10 +1000,7 @@ game.StartManual = function (type) {
             action: 'check_transaction',
             bet_amount: betMoney,
             win_amount: 0,
-            member_account: '12328XbtcX0d533145f54330d77',
-            game_uid: '067806e82742ca16bfffe70f76215647',
-            game_round: '3735554396885692691',
-            serial_number: '07cbadbe',
+            token: game.config.token,
             currency_code: 'USD',
         })
     })
@@ -1037,12 +1032,13 @@ game.StartManual = function (type) {
                 }, 2000);
             }
             else {
-                console.log('There is no enough money');
+                gUI.CheckoutStateNotification("There is no enough money");
             }
         })
         .catch((error) => {
             console.error('Error posting pay change:', error);
         });
+
 }
 
 /**
@@ -1060,10 +1056,7 @@ game.StartAuto = function () {
             action: 'check_transaction',
             bet_amount: betMoney,
             win_amount: 0,
-            member_account: '12328XbtcX0d533145f54330d77',
-            game_uid: '067806e82742ca16bfffe70f76215647',
-            game_round: '3735554396885692691',
-            serial_number: '07cbadbe',
+            token: game.config.token,
             currency_code: 'USD',
         })
     })
@@ -1108,8 +1101,8 @@ game.StartAuto = function () {
 
                 }, 2000);
             }
-            else {
-                console.log('There is no enough money');
+            else {                
+                gUI.CheckoutStateNotification("There is no enough money");
             }
         })
         .catch((error) => {
