@@ -40,6 +40,21 @@ function isExistUser($userId)
     }
 }
 
+function updateOne($userId, $gameUid)
+{
+    global $conn, $tableName;
+    try {
+        $stmt = $conn->prepare("UPDATE {$tableName} SET gameUid = ? WHERE userId = ?");
+        $stmt->bind_param("ss", $gameUid, $userId);
+        if (!$stmt->execute()) {
+            throw new \Exception($stmt->error);
+        }
+        $stmt->execute();
+    } catch (\Throwable $th) {
+        throw $th;
+    }
+}
+
 function updateTable($userId, $gameId, $lang, $money, $homeUrl, $token, $gameRound)
 {
     global $conn, $tableName;
@@ -69,6 +84,20 @@ function upsertTable($userId, $gameId, $lang, $money, $homeUrl, $token, $gameRou
                 throw new \Exception($stmt->error);
             }
             $stmt->close();
+        }
+    } catch (\Throwable $th) {
+        throw $th;
+    }
+}
+function upsertOne($userId, $gameUid)
+{
+    global $conn, $tableName;
+    try {
+        $isExist = isExistUser($userId);
+        if ($isExist) {
+            updateOne($userId, $gameUid);
+        } else {
+            errorResponse("Missing User");
         }
     } catch (\Throwable $th) {
         throw $th;

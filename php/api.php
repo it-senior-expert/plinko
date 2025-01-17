@@ -3,6 +3,7 @@ require __DIR__ . '/../vendor/autoload.php';
 require 'db_connection.php';
 require 'env_loader.php';
 require 'json_response.php';
+require 'utils.php';
 
 $apiKey = $_ENV['X_API_KEY'];
 
@@ -36,6 +37,8 @@ function checkTransaction($transactionData)
     global $apiKey, $userInfo;
     $url = $_ENV['API_URL'];
     $serialNumber = hash('sha256', $transactionData['bet_amount'] . $transactionData['win_amount'] . $userInfo['userId'] . '3735554396885692691' . $userInfo['gameRound']);
+    $gameUid = generateRandomString(26);
+    upsertOne($userInfo['userId'], $gameUid);
     $options = [
         'http' => [
             'header' => "Content-type: application/x-www-form-urlencoded\r\n" .
@@ -45,7 +48,7 @@ function checkTransaction($transactionData)
                 'bet_amount' => $transactionData['bet_amount'],
                 'win_amount' => $transactionData['win_amount'],
                 'member_account' => $userInfo['userId'],
-                'game_id' => '3735554396885692691',
+                'game_uid' => $gameUid,
                 'game_round' => $userInfo['gameRound'],
                 'serial_number' => $serialNumber,
                 'currency_code' => 'USD'
@@ -70,6 +73,7 @@ function updateTransaction($transactionData)
     global $apiKey, $userInfo;
     $url = $_ENV['API_URL'];
     $serialNumber = hash('sha256', $transactionData['bet_amount'] . $transactionData['win_amount'] . $userInfo['userId'] . '3735554396885692691' . $userInfo['gameRound']);
+    $gameUid = getUserByToken($transactionData['token'])['gameUid'];
     $options = [
         'http' => [
             'header' => "Content-type: application/x-www-form-urlencoded\r\n" .
@@ -79,7 +83,7 @@ function updateTransaction($transactionData)
                 'bet_amount' => $transactionData['bet_amount'],
                 'win_amount' => $transactionData['win_amount'],
                 'member_account' => $userInfo['userId'],
-                'game_id' => '3735554396885692691',
+                'game_uid' => $gameUid,
                 'game_round' => $userInfo['gameRound'],
                 'serial_number' => $serialNumber,
                 'currency_code' => 'USD'

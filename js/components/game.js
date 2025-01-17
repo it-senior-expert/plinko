@@ -1032,7 +1032,7 @@ game.StartManual = function (type) {
                 }, 2000);
             }
             else {
-                gUI.CheckoutStateNotification("There is no enough money");
+                console.log("There is no enough money");
             }
         })
         .catch((error) => {
@@ -1102,7 +1102,7 @@ game.StartAuto = function () {
                 }, 2000);
             }
             else {                
-                gUI.CheckoutStateNotification("There is no enough money");
+                console.log("There is no enough money");
             }
         })
         .catch((error) => {
